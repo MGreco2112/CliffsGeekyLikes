@@ -1,6 +1,7 @@
 package com.geekylikes.app.security;
 
 import com.geekylikes.app.security.jwt.AuthEntryPointJwt;
+import com.geekylikes.app.security.jwt.AuthTokenFilter;
 import com.geekylikes.app.security.services.UserDetailsImpl;
 import com.geekylikes.app.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
@@ -35,7 +37,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception{
-        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
