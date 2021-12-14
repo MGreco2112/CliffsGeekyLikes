@@ -5,6 +5,7 @@ import com.geekylikes.app.security.jwt.AuthTokenFilter;
 import com.geekylikes.app.security.services.UserDetailsImpl;
 import com.geekylikes.app.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 
 
 @Configuration
@@ -50,6 +52,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManager() throws Exception {
         return super.authenticationManagerBean();
     }
+
+    @Bean
+    public RestTemplate restTemplate (RestTemplateBuilder builder) {
+        return builder.build();
+    }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
