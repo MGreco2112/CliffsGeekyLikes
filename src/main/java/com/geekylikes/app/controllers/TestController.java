@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin
@@ -58,4 +59,17 @@ public class TestController {
         return ResponseEntity.ok(response.getArticles());
     }
 
+    //create second route
+    //get articles by source
+    @GetMapping("/news/source/{q}")
+    public ResponseEntity<?> getNewsByCategory(@PathVariable String q) {
+        String uri = "https://newsapi.org/v2/everything?sortBy=popularity";
+        uri += "&sources=" + q;
+        uri += "&apiKey=" + apiKey;
+
+        NewsResponse response = restTemplate.getForObject(uri, NewsResponse.class);
+
+        return ResponseEntity.ok(response.getArticles());
+
+    }
 }
