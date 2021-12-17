@@ -2,6 +2,7 @@ package com.geekylikes.app.models.developer;
 
 import com.fasterxml.jackson.annotation.*;
 import com.geekylikes.app.models.approve.Approve;
+import com.geekylikes.app.models.auth.User;
 import com.geekylikes.app.models.avatar.Avatar;
 import com.geekylikes.app.models.geekout.Geekout;
 import com.geekylikes.app.models.language.Language;
@@ -44,6 +45,14 @@ public class Developer {
 
     @OneToOne
     private Avatar avatar;
+
+    @OneToOne
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id"
+    )
+    @JsonIgnore
+    private User user;
 
     public Developer() {}
 
