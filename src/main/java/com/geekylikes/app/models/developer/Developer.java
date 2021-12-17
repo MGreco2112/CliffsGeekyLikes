@@ -48,7 +48,7 @@ public class Developer {
 
     @OneToOne
     @JoinColumn(
-            name = "user_id",
+            name = "users_id",
             referencedColumnName = "id"
     )
     @JsonIgnore
@@ -56,10 +56,11 @@ public class Developer {
 
     public Developer() {}
 
-    public Developer(String name, String email, Integer cohort) {
+    public Developer(String name, String email, Integer cohort, User user) {
         this.name = name;
         this.email = email;
         this.cohort = cohort;
+        this.user = user;
     }
 
     public Long getId() {
@@ -116,5 +117,13 @@ public class Developer {
 
     public void setAvatar(Avatar avatar) {
         this.avatar = avatar;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
