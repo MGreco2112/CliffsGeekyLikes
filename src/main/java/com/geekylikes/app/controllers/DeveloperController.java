@@ -70,6 +70,7 @@ public class DeveloperController {
 
         User currentUser = userRepository.findById(userDetails.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
+        //TODO add check for existing User/Developer pair
         newDeveloper.setUser(currentUser);
 
         return new ResponseEntity<>(repository.save(newDeveloper), HttpStatus.CREATED);
