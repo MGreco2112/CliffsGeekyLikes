@@ -9,6 +9,7 @@ import com.geekylikes.app.repositories.DeveloperRepository;
 import com.geekylikes.app.repositories.GeekoutRepository;
 import com.geekylikes.app.repositories.UserRepository;
 import com.geekylikes.app.security.services.UserDetailsImpl;
+import com.geekylikes.app.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,7 @@ public class DeveloperController {
     private GeekoutRepository geekoutRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping
     public @ResponseBody List<Developer> getDevelopers() {
@@ -65,10 +66,14 @@ public class DeveloperController {
     @PostMapping
     public ResponseEntity<Developer> createDeveloper(@RequestBody Developer newDeveloper) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//
+        User currentUser = userService.getCurrentUser();
 
-        User currentUser = userRepository.findById(userDetails.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        if (currentUser == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
 
         //TODO add check for existing User/Developer pair
         newDeveloper.setUser(currentUser);
@@ -78,7 +83,14 @@ public class DeveloperController {
 
     @PostMapping("/photo")
     public Developer addPhoto(@RequestBody Developer dev) {
-        Developer developer = repository.findById(dev.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser == null) {
+            return null;
+        }
+
+        Developer developer = repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         // check if developer has an avatar and if so, delete or modify existing avatar before creating new.
         if (developer.getAvatar() != null) {
             Avatar avatar = developer.getAvatar();
