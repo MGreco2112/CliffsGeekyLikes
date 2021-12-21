@@ -63,13 +63,26 @@ public class DeveloperController {
         return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/self")
+    public  Developer getCurrentUser() {
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser == null) {
+            return null;
+        }
+
+
+        return repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
 
     @PostMapping
     public ResponseEntity<Developer> createDeveloper(@RequestBody Developer newDeveloper) {
 
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//
+//        Above lines outmoded by userService.getCurrentUser();
+
         User currentUser = userService.getCurrentUser();
 
         if (currentUser == null) {
