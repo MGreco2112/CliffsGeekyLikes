@@ -134,7 +134,7 @@ public class DeveloperController {
         if (updates.getName() != null) developer.setName(updates.getName());
         if (updates.getEmail() != null) developer.setEmail(updates.getEmail());
         if (updates.getCohort() != null) developer.setCohort(updates.getCohort());
-        if (updates.languages != null) developer.languages = updates.languages;
+//        if (updates.languages != null) developer.languages = updates.languages;
 
         return repository.save(developer);
     }
