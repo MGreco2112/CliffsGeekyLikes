@@ -139,9 +139,15 @@ public class DeveloperController {
         return repository.save(developer);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     public ResponseEntity<String> destroyDeveloper(@PathVariable Long id) {
-        repository.deleteById(id);
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser == null) {
+            return null;
+        }
+
+        repository.deleteByUser_id(currentUser.getId());
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
