@@ -4,6 +4,7 @@ import com.geekylikes.app.models.auth.User;
 import com.geekylikes.app.models.avatar.Avatar;
 import com.geekylikes.app.models.developer.Developer;
 import com.geekylikes.app.models.geekout.Geekout;
+import com.geekylikes.app.models.language.Language;
 import com.geekylikes.app.repositories.AvatarRepository;
 import com.geekylikes.app.repositories.DeveloperRepository;
 import com.geekylikes.app.repositories.GeekoutRepository;
@@ -82,7 +83,7 @@ public class DeveloperController {
     }
 
     @PostMapping("/photo")
-    public Developer addPhoto(@RequestBody Developer dev) {
+    public Developer addPhoto(@RequestBody Developer dev) { //TODO refactor dev to updates
 
         User currentUser = userService.getCurrentUser();
 
@@ -105,16 +106,28 @@ public class DeveloperController {
     }
 
     @PutMapping("/language")
-    public Developer addLanguage(@RequestBody Developer updates) {
-        Developer developer = repository.findById(updates.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public Developer addLanguage(@RequestBody List<Language> updates) {
+        User currentUser = userService.getCurrentUser();
 
-        developer.languages.addAll(updates.languages);
+        if (currentUser == null) {
+            return null;
+        }
+
+        Developer developer = repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        developer.languages.addAll(updates);
         return repository.save(developer);
     }
 
-    @PutMapping("/{id}")
-    public @ResponseBody Developer updateDeveloper(@PathVariable Long id, @RequestBody Developer updates) {
-        Developer developer = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    @PutMapping
+    public @ResponseBody Developer updateDeveloper(@RequestBody Developer updates) {
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser == null) {
+            return null;
+        }
+
+        Developer developer = repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
 //        updates.setId(developer.getId());
 //        return repository.save(updates);
