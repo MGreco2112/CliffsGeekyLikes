@@ -11,10 +11,10 @@ import com.geekylikes.app.repositories.RoleRepository;
 import com.geekylikes.app.repositories.UserRepository;
 import com.geekylikes.app.security.JwtUtils;
 import com.geekylikes.app.security.services.UserDetailsImpl;
-import org.aspectj.bridge.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,7 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.SecondaryTable;
+
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -77,6 +78,7 @@ public class AuthController {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
+            System.out.println(true);
             Role userRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found"));
             roles.add(userRole);
         } else {
@@ -101,10 +103,12 @@ public class AuthController {
                 }
             });
 
-            user.setRoles(roles);
-
-            repository.save(user);
         }
+        user.setRoles(roles);
+        for (Role role : user.getRoles()) {
+            System.out.println(role);
+        }
+        repository.save(user);
 
         return new ResponseEntity(new MessageResponse("User Registered Successfully"), HttpStatus.CREATED);
     }
