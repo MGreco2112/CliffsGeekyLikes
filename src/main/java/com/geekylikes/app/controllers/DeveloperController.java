@@ -90,6 +90,14 @@ public class DeveloperController {
         }
 
         //TODO add check for existing User/Developer pair
+
+        for (Developer developer : repository.findAll()) {
+            if (developer.getUser() == currentUser) {
+                return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            }
+        }
+
+
         newDeveloper.setUser(currentUser);
 
         return new ResponseEntity<>(repository.save(newDeveloper), HttpStatus.CREATED);
