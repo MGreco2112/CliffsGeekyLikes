@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.xml.bind.annotation.XmlType;
 import java.util.Optional;
 
 @RestController
@@ -68,6 +67,29 @@ public class RelationshipController {
         return new ResponseEntity<>(new MessageResponse("Success"), HttpStatus.CREATED);
     }
 
+    @PostMapping("/block/{rId}")
+    public ResponseEntity<MessageResponse> blockRecipient(@PathVariable Long rId) {
+        User currentUser = userService.getCurrentUser();
 
+        if (currentUser == null) {
+            return new ResponseEntity<>(new MessageResponse("Invalid user"), HttpStatus.BAD_REQUEST);
+        }
+
+        Developer originator = developerRepository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Developer recipient = developerRepository.findById(rId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        //TODO: this vvvv
+        //if Pending: change to Blocked
+        //if Approved: change to Blocked
+        //if Blocked: do nothing
+
+        try {
+            repository.save(new Relationship(originator, recipient, ERelationship.BLOCKED));
+        } catch (Exception e) {
+            System.out.println("error " + e.getLocalizedMessage());
+            return new ResponseEntity<>(new MessageResponse("SERVER_ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
