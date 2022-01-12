@@ -90,6 +90,8 @@ public class RelationshipController {
             System.out.println("error " + e.getLocalizedMessage());
             return new ResponseEntity<>(new MessageResponse("SERVER_ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        return new ResponseEntity<>(new MessageResponse("User Blocked"), HttpStatus.CREATED);
     }
 
 }
