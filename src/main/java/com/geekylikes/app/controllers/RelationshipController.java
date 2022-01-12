@@ -79,10 +79,39 @@ public class RelationshipController {
 
         Developer recipient = developerRepository.findById(rId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        //TODO: this vvvv
-        //if Pending: change to Blocked
-        //if Approved: change to Blocked
-        //if Blocked: do nothing
+
+        Optional<Relationship> rel = repository.findAllByOriginator_IdAndRecipient_Id(originator.getId(), recipient.getId());
+
+        if (rel.isPresent()) {
+            switch (rel.get().getType()) {
+                case PENDING:
+                case ACCEPTED:
+                    rel.get().setType(ERelationship.BLOCKED);
+                    repository.save(rel.get());
+                    return new ResponseEntity<>(new MessageResponse("Blocked"), HttpStatus.OK);
+                case BLOCKED:
+                    return new ResponseEntity<>(new MessageResponse("Blocked"), HttpStatus.OK);
+                default:
+                    return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP STATUS"), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        Optional<Relationship> inverseRel = repository.findAllByOriginator_IdAndRecipient_Id(recipient.getId(), originator.getId());
+
+        if (inverseRel.isPresent()) {
+            switch (inverseRel.get().getType()) {
+                case PENDING:
+                case ACCEPTED:
+                    inverseRel.get().setType(ERelationship.BLOCKED);
+                    repository.save(inverseRel.get());
+                    return new ResponseEntity<>(new MessageResponse("Blocked"), HttpStatus.OK);
+                case BLOCKED:
+                    return new ResponseEntity<>(new MessageResponse("Blocked"), HttpStatus.OK);
+                default:
+                    return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP STATUS"), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
 
         try {
             repository.save(new Relationship(originator, recipient, ERelationship.BLOCKED));
