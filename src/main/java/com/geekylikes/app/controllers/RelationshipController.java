@@ -123,4 +123,38 @@ public class RelationshipController {
         return new ResponseEntity<>(new MessageResponse("User Blocked"), HttpStatus.CREATED);
     }
 
+    @PutMapping("/approve/{rId}")
+    public ResponseEntity<MessageResponse> approveRelationship(@PathVariable Long rId) {
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser == null) {
+            return new ResponseEntity<>(new MessageResponse("Invalid user"), HttpStatus.BAD_REQUEST);
+        }
+
+        Developer recipient = developerRepository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Developer originator = developerRepository.findByUser_id(rId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Optional<Relationship> rel = repository.findAllByOriginator_IdAndRecipient_Id(originator.getId(), recipient.getId());
+
+        if (rel.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP"), HttpStatus.BAD_REQUEST);
+        }
+
+        switch (rel.get().getType()) {
+            case PENDING:
+                rel.get().setType(ERelationship.ACCEPTED);
+                repository.save(rel.get());
+                return new ResponseEntity<>(new MessageResponse("Accepted"), HttpStatus.OK);
+            case BLOCKED:
+                return new ResponseEntity<>(new MessageResponse("ERROR"), HttpStatus.BAD_REQUEST);
+            case ACCEPTED:
+                return new ResponseEntity<>(new MessageResponse("Already Accepted"), HttpStatus.OK);
+            default:
+                return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP STATUS"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+
 }
