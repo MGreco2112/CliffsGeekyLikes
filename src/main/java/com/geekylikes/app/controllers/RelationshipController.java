@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @CrossOrigin
@@ -26,6 +27,25 @@ public class RelationshipController {
     private UserService userService;
     @Autowired
     private DeveloperRepository developerRepository;
+
+    @GetMapping("/friends")
+    public ResponseEntity<?> getAllFriends() {
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser == null) {
+            return new ResponseEntity<>(new MessageResponse("Invalid user"), HttpStatus.BAD_REQUEST);
+        }
+
+        Developer developer = developerRepository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Set<Relationship> rels = repository.findAllByOriginator_IdAndType(developer.getId(), ERelationship.ACCEPTED);
+
+        Set<Relationship> invRels = repository.findAllByRecipient_IdAndType(developer.getId(), ERelationship.ACCEPTED);
+
+        rels.addAll(invRels);
+
+        return new ResponseEntity<>(rels, HttpStatus.OK);
+    }
 
     @PostMapping("/add/{rId}")
     public ResponseEntity<MessageResponse> addRelationship(@PathVariable Long rId) {
@@ -123,8 +143,8 @@ public class RelationshipController {
         return new ResponseEntity<>(new MessageResponse("User Blocked"), HttpStatus.CREATED);
     }
 
-    @PutMapping("/approve/{rId}")
-    public ResponseEntity<MessageResponse> approveRelationship(@PathVariable Long rId) {
+    @PutMapping("/approve/{id}")
+    public ResponseEntity<MessageResponse> approveRelationship(@PathVariable Long id) {
         User currentUser = userService.getCurrentUser();
 
         if (currentUser == null) {
@@ -133,28 +153,66 @@ public class RelationshipController {
 
         Developer recipient = developerRepository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Developer originator = developerRepository.findByUser_id(rId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Optional<Relationship> rel = repository.findAllByOriginator_IdAndRecipient_Id(originator.getId(), recipient.getId());
+        //My Way
+//        Developer originator = developerRepository.findByUser_id(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (rel.isEmpty()) {
-            return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP"), HttpStatus.BAD_REQUEST);
+//        Optional<Relationship> rel = repository.findAllByOriginator_IdAndRecipient_Id(originator.getId(), recipient.getId());
+//
+//        if (rel.isEmpty()) {
+//            return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP"), HttpStatus.BAD_REQUEST);
+//        }
+//
+//        switch (rel.get().getType()) {
+//            case PENDING:
+//                rel.get().setType(ERelationship.ACCEPTED);
+//                repository.save(rel.get());
+//                return new ResponseEntity<>(new MessageResponse("Accepted"), HttpStatus.OK);
+//            case BLOCKED:
+//                return new ResponseEntity<>(new MessageResponse("ERROR"), HttpStatus.BAD_REQUEST);
+//            case ACCEPTED:
+//                return new ResponseEntity<>(new MessageResponse("Already Accepted"), HttpStatus.OK);
+//            default:
+//                return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP STATUS"), HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+
+        //Cliff's Way
+        Relationship rel = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (rel.getRecipient().getId() != recipient.getId()) {
+            return new ResponseEntity<>(new MessageResponse("UNAUTHORIZED"), HttpStatus.UNAUTHORIZED);
         }
 
-        switch (rel.get().getType()) {
-            case PENDING:
-                rel.get().setType(ERelationship.ACCEPTED);
-                repository.save(rel.get());
-                return new ResponseEntity<>(new MessageResponse("Accepted"), HttpStatus.OK);
-            case BLOCKED:
-                return new ResponseEntity<>(new MessageResponse("ERROR"), HttpStatus.BAD_REQUEST);
-            case ACCEPTED:
-                return new ResponseEntity<>(new MessageResponse("Already Accepted"), HttpStatus.OK);
-            default:
-                return new ResponseEntity<>(new MessageResponse("SERVER_ERROR: INVALID RELATIONSHIP STATUS"), HttpStatus.INTERNAL_SERVER_ERROR);
+        if (rel.getType() == ERelationship.PENDING) {
+            rel.setType(ERelationship.ACCEPTED);
+            repository.save(rel);
         }
 
+        return new ResponseEntity<>(new MessageResponse("Approved"), HttpStatus.OK);
 
+    }
+
+    @DeleteMapping("/remove/{id}")
+    public ResponseEntity<MessageResponse> removeRelationship(@PathVariable Long id) {
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser == null) {
+            return new ResponseEntity<>(new MessageResponse("Invalid user"), HttpStatus.BAD_REQUEST);
+        }
+
+        Developer developer = developerRepository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Relationship rel = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (rel.getOriginator().getId() != developer.getId() && rel.getRecipient().getId() != developer.getId()) {
+            return new ResponseEntity<>(new MessageResponse("UNAUTHORIZED"), HttpStatus.UNAUTHORIZED);
+        }
+
+        if (rel.getType() != ERelationship.BLOCKED) {
+            repository.delete(rel);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Success"), HttpStatus.OK);
     }
 
 }
