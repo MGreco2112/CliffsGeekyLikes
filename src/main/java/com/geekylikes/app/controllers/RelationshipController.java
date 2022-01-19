@@ -38,9 +38,9 @@ public class RelationshipController {
 
         Developer developer = developerRepository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Set<Relationship> rels = repository.findAllByOriginator_IdAndType(developer.getId(), ERelationship.ACCEPTED);
+        Set<Relationship> rels = repository.findAllByOriginator_idAndType(developer.getId(), ERelationship.ACCEPTED);
 
-        Set<Relationship> invRels = repository.findAllByRecipient_IdAndType(developer.getId(), ERelationship.ACCEPTED);
+        Set<Relationship> invRels = repository.findAllByRecipient_idAndType(developer.getId(), ERelationship.ACCEPTED);
 
         rels.addAll(invRels);
 
@@ -59,13 +59,13 @@ public class RelationshipController {
 
         Developer recipient = developerRepository.findById(rId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Optional<Relationship> rel = repository.findAllByOriginator_IdAndRecipient_Id(originator.getId(), recipient.getId());
+        Optional<Relationship> rel = repository.findAllByOriginator_idAndRecipient_id(originator.getId(), recipient.getId());
 
         if (rel.isPresent()) {
             return new ResponseEntity<>(new MessageResponse("Nice try, be patient"), HttpStatus.OK);
         }
 
-        Optional<Relationship> inverseRel = repository.findAllByOriginator_IdAndRecipient_Id(recipient.getId(), originator.getId());
+        Optional<Relationship> inverseRel = repository.findAllByOriginator_idAndRecipient_id(recipient.getId(), originator.getId());
 
         if (inverseRel.isPresent()) {
             switch (inverseRel.get().getType()) {
@@ -100,7 +100,7 @@ public class RelationshipController {
         Developer recipient = developerRepository.findById(rId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
 
-        Optional<Relationship> rel = repository.findAllByOriginator_IdAndRecipient_Id(originator.getId(), recipient.getId());
+        Optional<Relationship> rel = repository.findAllByOriginator_idAndRecipient_id(originator.getId(), recipient.getId());
 
         if (rel.isPresent()) {
             switch (rel.get().getType()) {
@@ -116,7 +116,7 @@ public class RelationshipController {
             }
         }
 
-        Optional<Relationship> inverseRel = repository.findAllByOriginator_IdAndRecipient_Id(recipient.getId(), originator.getId());
+        Optional<Relationship> inverseRel = repository.findAllByOriginator_idAndRecipient_id(recipient.getId(), originator.getId());
 
         if (inverseRel.isPresent()) {
             switch (inverseRel.get().getType()) {
