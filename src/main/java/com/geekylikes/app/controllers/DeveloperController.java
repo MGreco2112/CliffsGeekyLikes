@@ -5,6 +5,8 @@ import com.geekylikes.app.models.avatar.Avatar;
 import com.geekylikes.app.models.developer.Developer;
 import com.geekylikes.app.models.geekout.Geekout;
 import com.geekylikes.app.models.language.Language;
+import com.geekylikes.app.payloads.response.FriendDeveloper;
+import com.geekylikes.app.payloads.response.PublicDeveloper;
 import com.geekylikes.app.repositories.AvatarRepository;
 import com.geekylikes.app.repositories.DeveloperRepository;
 import com.geekylikes.app.repositories.GeekoutRepository;
@@ -58,10 +60,10 @@ public class DeveloperController {
         return geekoutRepository.findAllByApprovals_developer_id(devId);
     }
 
-    @GetMapping("/{id}")
-    public @ResponseBody Developer getOneDeveloper(@PathVariable Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
+//    @GetMapping("/{id}")
+//    public @ResponseBody Developer getOneDeveloper(@PathVariable Long id) {
+//        return repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+//    }
 
     @GetMapping("/self")
     public  Developer getCurrentUser() {
@@ -73,6 +75,14 @@ public class DeveloperController {
 
 
         return repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getDeveloperById(@PathVariable Long id) {
+        Developer developer = repository.findByUser_id(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return new ResponseEntity(FriendDeveloper.build(developer), HttpStatus.OK);
+//        return PublicDeveloper.build(developer);
     }
 
 
@@ -89,7 +99,6 @@ public class DeveloperController {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
-        //TODO add check for existing User/Developer pair
 
         for (Developer developer : repository.findAll()) {
             if (developer.getUser() == currentUser) {
