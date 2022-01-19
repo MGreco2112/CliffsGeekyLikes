@@ -81,6 +81,8 @@ public class DeveloperController {
     public ResponseEntity<?> getDeveloperById(@PathVariable Long id) {
         Developer developer = repository.findByUser_id(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+        //TODO write logic to determine what to send back for Friends, nonFriends, Blocked
+
         return new ResponseEntity(FriendDeveloper.build(developer), HttpStatus.OK);
 //        return PublicDeveloper.build(developer);
     }
