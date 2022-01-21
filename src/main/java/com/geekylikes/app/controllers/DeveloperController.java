@@ -90,7 +90,7 @@ public class DeveloperController {
 
         Developer currentDeveloper = repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Developer developer = repository.findByUser_id(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Developer developer = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         //TODO write logic to determine what to send back for Friends, nonFriends, Blocked
 
