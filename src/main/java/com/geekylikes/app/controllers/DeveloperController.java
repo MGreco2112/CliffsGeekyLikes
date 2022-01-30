@@ -6,6 +6,7 @@ import com.geekylikes.app.models.developer.Developer;
 import com.geekylikes.app.models.geekout.Geekout;
 import com.geekylikes.app.models.language.Language;
 import com.geekylikes.app.models.relationship.ERelationship;
+import com.geekylikes.app.models.relationship.Relationship;
 import com.geekylikes.app.payloads.response.FriendDeveloper;
 import com.geekylikes.app.payloads.response.MessageResponse;
 import com.geekylikes.app.payloads.response.PublicDeveloper;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -38,6 +40,9 @@ public class DeveloperController {
 
     @Autowired
     private RelationshipRepository relationshipRepository;
+
+    @Autowired
+    private LanguageRepository languageRepository;
 
     @Autowired
     private UserService userService;
@@ -96,12 +101,15 @@ public class DeveloperController {
 
         if (relationshipRepository.existsByOriginator_idAndRecipient_idAndType(currentDeveloper.getId(), developer.getId(), ERelationship.ACCEPTED) ||
                 relationshipRepository.existsByOriginator_idAndRecipient_idAndType(developer.getId(), currentDeveloper.getId(), ERelationship.ACCEPTED)) {
+
+            Set<Relationship> developerFriends = relationshipRepository.findAllByOriginator_idAndType(developer.getId(), ERelationship.ACCEPTED);
+            developerFriends.addAll(relationshipRepository.findAllByRecipient_idAndType(developer.getId(), ERelationship.ACCEPTED));
+
             return new ResponseEntity<>(FriendDeveloper.build(developer), HttpStatus.OK);
 
         }
 
         return new ResponseEntity<>(PublicDeveloper.build(developer), HttpStatus.OK);
-
     }
 
 
@@ -164,7 +172,12 @@ public class DeveloperController {
 
         Developer developer = repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        developer.languages.addAll(updates);
+        for (Language lang : updates) {
+            Language addedLanguage = languageRepository.findById(lang.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+            developer.languages.add(addedLanguage);
+        }
+
         return repository.save(developer);
     }
 

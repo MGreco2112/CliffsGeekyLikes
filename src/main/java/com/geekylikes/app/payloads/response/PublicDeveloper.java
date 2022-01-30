@@ -1,5 +1,6 @@
 package com.geekylikes.app.payloads.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.geekylikes.app.models.avatar.Avatar;
 import com.geekylikes.app.models.developer.Developer;
@@ -11,7 +12,7 @@ public class PublicDeveloper {
     private Long id;
     private String name;
     private Integer cohort;
-    @JsonIncludeProperties("developers")
+    @JsonIgnoreProperties("developers")
     private Set<Language> languages;
     private Avatar avatar;
 
