@@ -10,6 +10,7 @@ import com.geekylikes.app.models.relationship.Relationship;
 import com.geekylikes.app.payloads.response.FriendDeveloper;
 import com.geekylikes.app.payloads.response.MessageResponse;
 import com.geekylikes.app.payloads.response.PublicDeveloper;
+import com.geekylikes.app.payloads.response.SelfDeveloper;
 import com.geekylikes.app.repositories.*;
 import com.geekylikes.app.security.services.UserDetailsImpl;
 import com.geekylikes.app.services.UserService;
@@ -73,7 +74,7 @@ public class DeveloperController {
 //    }
 
     @GetMapping("/self")
-    public  Developer getCurrentUser() {
+    public  SelfDeveloper getCurrentUser() {
         User currentUser = userService.getCurrentUser();
 
         if (currentUser == null) {
@@ -81,7 +82,9 @@ public class DeveloperController {
         }
 
 
-        return repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Developer currentDev = repository.findByUser_id(currentUser.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return SelfDeveloper.build(currentDev);
     }
 
     @GetMapping("/{id}")
@@ -114,7 +117,7 @@ public class DeveloperController {
 
 
     @PostMapping
-    public ResponseEntity<Developer> createDeveloper(@RequestBody Developer newDeveloper) {
+    public ResponseEntity<SelfDeveloper> createDeveloper(@RequestBody Developer newDeveloper) {
 
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -136,7 +139,9 @@ public class DeveloperController {
 
         newDeveloper.setUser(currentUser);
 
-        return new ResponseEntity<>(repository.save(newDeveloper), HttpStatus.CREATED);
+        Developer newDev = repository.save(newDeveloper);
+
+        return new ResponseEntity<>(SelfDeveloper.build(newDev), HttpStatus.CREATED);
     }
 
     @PostMapping("/photo")

@@ -4,6 +4,7 @@ import com.geekylikes.app.models.avatar.Avatar;
 import com.geekylikes.app.models.developer.Developer;
 import com.geekylikes.app.models.language.Language;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class SelfDeveloper {
@@ -30,21 +31,24 @@ public class SelfDeveloper {
     }
 
 
-    //TODO finish
-//    public static SelfDeveloper build(Developer developer) {
-//
-//        return new SelfDeveloper(developer.getId(),
-//                developer.getName(),
-//                developer.getEmail(),
-//                developer.getCohort(),
-//                );
-//
-//        this.friends = friends;
-//        this.pendingFriendship = pendingFriendship;
-//        this.incomingFriendship = incomingFriendship;
-//        this.avatar = developer.getAvatar();
-//        this.languages = developer.getLanguages();
-//    }
+    public static SelfDeveloper build(Developer developer) {
+
+        Set<Developer> friends = developer.getRelationships();
+        friends.addAll(developer.getInverseRelationships());
+
+        return new SelfDeveloper(
+                developer.getId(),
+                developer.getName(),
+                developer.getEmail(),
+                developer.getCohort(),
+                friends,
+                developer.getPendingRelationships(),
+                developer.getIncomingRelationships(),
+                developer.getAvatar(),
+                developer.getLanguages()
+                );
+
+    }
 
     public Long getId() {
         return id;

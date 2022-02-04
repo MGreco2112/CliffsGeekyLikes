@@ -6,6 +6,7 @@ import com.geekylikes.app.models.auth.User;
 import com.geekylikes.app.models.avatar.Avatar;
 import com.geekylikes.app.models.geekout.Geekout;
 import com.geekylikes.app.models.language.Language;
+import org.hibernate.annotations.WhereJoinTable;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -60,8 +61,9 @@ public class Developer {
             joinColumns = @JoinColumn(name = "originator_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "recipient_id", referencedColumnName = "id")
     )
+    @WhereJoinTable(clause = "type = 'ACCEPTED'")
     @JsonIgnore
-    private Set<Developer> relationships;
+    private Set<Developer> relationships = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -70,7 +72,30 @@ public class Developer {
             inverseJoinColumns = @JoinColumn(name = "originator_id", referencedColumnName = "id")
     )
     @JsonIgnore
-    private Set<Developer> InverseRelationships;
+    @WhereJoinTable(clause = "type = 'ACCEPTED'")
+    private Set<Developer> InverseRelationships = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "relationship",
+            joinColumns = @JoinColumn(name = "originator_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "recipient_id", referencedColumnName = "id")
+    )
+    @WhereJoinTable(clause = "type = 'PENDING'")
+    @JsonIgnore
+    private Set<Developer> pendingRelationships = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "relationship",
+            joinColumns = @JoinColumn(name = "recipient_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "originator_id", referencedColumnName = "id")
+    )
+    @JsonIgnore
+    @WhereJoinTable(clause = "type = 'PENDING'")
+    private Set<Developer> incomingRelationships = new HashSet<>();
+
+
 
     public Developer() {}
 
@@ -159,5 +184,21 @@ public class Developer {
 
     public void setInverseRelationships(Set<Developer> inverseRelationships) {
         InverseRelationships = inverseRelationships;
+    }
+
+    public Set<Developer> getPendingRelationships() {
+        return pendingRelationships;
+    }
+
+    public void setPendingRelationships(Set<Developer> pendingRelationships) {
+        this.pendingRelationships = pendingRelationships;
+    }
+
+    public Set<Developer> getIncomingRelationships() {
+        return incomingRelationships;
+    }
+
+    public void setIncomingRelationships(Set<Developer> incomingRelationships) {
+        this.incomingRelationships = incomingRelationships;
     }
 }
